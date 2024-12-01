@@ -11,7 +11,7 @@ createRoot(document.getElementById("root")).render(
     <StrictMode>
         <QueryClientProvider client={queryClient}>
             <PageContextProvider>
-                <div className="h-100 bg-black">
+                <div className="h-max bg-black">
                     <RouterProvider router={router} />
                 </div>
             </PageContextProvider>
