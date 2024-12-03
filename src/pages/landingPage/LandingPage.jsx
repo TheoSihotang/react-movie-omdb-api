@@ -1,21 +1,22 @@
-import React, { useContext } from "react";
-import { useQuery } from "react-query";
+import React, {useContext} from "react";
+import {useQuery} from "react-query";
 import LoadingComponent from "../../shared/loading/LoadingComponent";
-import { PageContext } from "../../context/PageContext";
+import {PageContext} from "../../context/PageContext";
+import {useNavigate} from "react-router-dom";
 
 export default function LandingPage(props) {
-    const { page, prevPage, nextPage } = useContext(PageContext);
-    console.log(page);
-    const movies = [];
+    const {page, prevPage, nextPage} = useContext(PageContext);
+    const navigate = useNavigate()
+    let movies = [];
     const api = import.meta.env.VITE_API_KEY;
     const img_300 = "https://image.tmdb.org/t/p/w300";
-    const { isLoading, data, error, refetch } = useQuery({
+    const {isLoading, data, error, refetch} = useQuery({
         queryKey: ["movies"],
         queryFn: async () => {
-            const movies = await fetch(
+            const fetchMovies = await fetch(
                 `https://api.themoviedb.org/3/trending/all/day?api_key=${api}&page=${page}`
             ).then((res) => res.json());
-            return movies;
+            return fetchMovies;
         },
         refetchOnWindowFocus: false,
     });
@@ -23,16 +24,20 @@ export default function LandingPage(props) {
 
     if (results.length > 0) {
         results.map(async (movie) => {
-            return await movies.push(movie);
+            return movies.push(movie);
         });
     }
     console.log(movies);
+    const handleOpenDetailMovie = (movie) => {
+        navigate('/details', {state: movie});
+    }
+
 
     if (isLoading || !movies.length) {
         return (
             <>
                 <div className="container h-screen flex justify-center items-center">
-                    <LoadingComponent color={"#32cd32"} size="medium" />
+                    <LoadingComponent color={"#32cd32"} size="medium"/>
                 </div>
             </>
         );
@@ -44,30 +49,37 @@ export default function LandingPage(props) {
 
     return (
         <>
-            <div className="container mx-auto py-4">
+            <div className="container mx-auto py-12">
                 <div className="flex justify-center items-center">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center items-center">
+                    <div
+                        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center items-center">
                         {movies?.map((movie, index) => {
                             return (
-                                <div
-                                    className="card justify-center items-center"
-                                    key={index}
-                                >
-                                    <img
-                                        src={`${img_300}${movie.poster_path}`}
-                                        alt={
-                                            movie.original_title ||
-                                            movie.original_name ||
-                                            movie.title
-                                        }
-                                        className="rounded-lg"
-                                    />
-                                    <h2 className="text-white mt-2">
-                                        {movie.original_title ||
-                                            movie.original_name ||
-                                            movie.title}
-                                    </h2>
-                                </div>
+                                <button key={movie.id}
+                                        className="transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-transparent duration-300"
+                                        onClick={() => {
+                                            handleOpenDetailMovie(movie)
+                                        }}>
+                                    <div
+                                        className="card justify-center items-center"
+                                        key={index}
+                                    >
+                                        <img
+                                            src={`${img_300}${movie.poster_path}`}
+                                            alt={
+                                                movie.original_title ||
+                                                movie.original_name ||
+                                                movie.title
+                                            }
+                                            className="rounded-lg"
+                                        />
+                                        <h2 className="text-white mt-2 font-bold">
+                                            {movie.original_title ||
+                                                movie.original_name ||
+                                                movie.title}
+                                        </h2>
+                                    </div>
+                                </button>
                             );
                         })}
                     </div>
